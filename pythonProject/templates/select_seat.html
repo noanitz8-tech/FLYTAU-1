@@ -5,376 +5,470 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLYTAU - בחירת מושבים</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
+            /* צבעי FLYTAU */
             --flytau-navy: #001b33;
             --flytau-teal: #00818a;
+            --flytau-teal-light: #e0f7fa;
             --flytau-teal-hover: #006b72;
-            --flytau-bg: #f1f5f9;
-            --text-main: #001b33;
-            --text-muted: #64748b;
-            --border-color: #cbd5e1;
             
-            --seat-biz-bg: #1e293b; 
-            --seat-biz-icon: #ffffff; 
-            --seat-eco-bg: #e0f2fe; 
-            --seat-eco-border: #7dd3fc;
-            --seat-eco-icon: #0284c7;
-            --seat-occ-bg: #e2e8f0; 
-            --seat-occ-icon: #94a3b8;
+            /* צבעים כלליים */
+            --bg-gray: #F1F5F9;
+            --text-dark: #334155;
+            --text-light: #94A3B8;
+            --occupied: #cbd5e1;
         }
+
+        * { box-sizing: border-box; }
 
         body {
+            margin: 0; padding: 0;
             font-family: 'Heebo', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-bottom: 100px;
-            overflow-x: hidden;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
         }
 
-        header {
-            width: 100%; height: 60px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            position: sticky; top: 0; z-index: 1000; box-sizing: border-box;
-            border-top: 3px solid var(--flytau-teal);
-        }
-
-        .logo img { height: 40px; width: auto; display: block; }
-        
-        .flight-route { 
-            display: flex; align-items: center; gap: 8px; 
-            font-weight: 800; font-size: 16px; color: var(--flytau-navy); 
-            background: #f1f5f9; padding: 4px 12px; border-radius: 20px;
-        }
-        .flight-route i { color: var(--flytau-teal); font-size: 14px; transform: rotate(180deg); }
-        .flight-tag { background: var(--flytau-navy); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: white; }
-
-        .status-bar {
-            margin-top: 10px;
-            background: white; padding: 8px 20px;
-            border-radius: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex; gap: 20px; align-items: center; font-size: 13px; z-index: 900;
-        }
-        .status-info b { color: var(--flytau-teal); font-size: 14px; }
-        .legend { display: flex; gap: 15px; border-right: 1px solid var(--border-color); padding-right: 15px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; }
-        .dot { width: 10px; height: 10px; border-radius: 3px; }
-
-        .airplane-wrapper {
-            position: relative;
-            margin-top: 20px;
-            filter: drop-shadow(0 40px 80px rgba(15, 23, 42, 0.15));
-        }
-
-        .wing {
-            position: absolute; top: 38%; width: 240px; height: 300px;
-            background: #cbd5e1; z-index: -1; border: 1px solid #94a3b8;
-        }
-        .wing.left { left: -160px; transform: skewY(15deg); border-radius: 30px 0 0 100px; border-right: none; background: linear-gradient(90deg, #e2e8f0, #cbd5e1); }
-        .wing.right { right: -160px; transform: skewY(-15deg); border-radius: 0 30px 100px 0; border-left: none; background: linear-gradient(-90deg, #e2e8f0, #cbd5e1); }
-
-        .tail-fin {
-            position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%);
-            width: 160px; height: 100px; background: #cbd5e1; z-index: -2;
-            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-            background: linear-gradient(180deg, #e2e8f0, #94a3b8);
-        }
-
-        .fuselage {
-            width: 320px;
-            background: white;
-            border-radius: 160px 160px 80px 80px;
-            border: 1px solid white;
-            position: relative;
-            display: flex; flex-direction: column; align-items: center;
-            padding-bottom: 50px;
-        }
-
-        .cockpit {
-            width: 100%; height: 120px;
-            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 60%, #ffffff 100%);
-            border-radius: 160px 160px 0 0;
-            display: flex; justify-content: center; align-items: center;
-            padding-top: 30px; 
-            border-bottom: 2px solid #f1f5f9;
-        }
-
-        .window-glass {
-            width: 110px; height: 45px;
-            border-radius: 22px 22px 12px 12px; position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, var(--flytau-navy) 0%, #334155 100%);
-        }
-        .window-glass::after {
-            content: ''; position: absolute; top: 8px; right: 18px; width: 30px; height: 6px;
-            background: rgba(255,255,255,0.15); border-radius: 10px; transform: rotate(-10deg);
-        }
-
-        .cabin { width: 100%; padding-top: 5px; }
-
-        .section-title {
-            text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 1px;
-            color: var(--flytau-teal); text-transform: uppercase; margin: 15px 0 10px 0;
-            position: relative;
-        }
-        .section-title span { background: white; padding: 0 10px; position: relative; z-index: 1; border: 1px solid #e2e8f0; border-radius: 10px; }
-        .section-title::before {
-            content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 80%; height: 1px; background: #e2e8f0; z-index: 0;
-        }
-
-        .grid {
+        /* --- Layout --- */
+        .layout-container {
             display: grid;
-            grid-template-columns: repeat(2, 42px) 30px repeat(2, 42px);
-            gap: 12px; justify-content: center;
+            grid-template-columns: 1fr 450px; /* מטוס | סרגל צד */
+            height: 100vh;
         }
 
-        .aisle-num {
-            grid-column: 3; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 700; color: #cbd5e1;
+        /* --- אזור המטוס (נגלל) --- */
+        .plane-scroll-area {
+            overflow-y: auto;
+            position: relative;
+            background-color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            padding-top: 80px;
+            padding-bottom: 150px;
         }
+
+        /* --- עיצוב המטוס החדש (Tripma Style בלי פסים) --- */
+        .plane-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .plane-body {
+            position: relative;
+            /* גרדיאנט עדין ליצירת נפח */
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
+            /* הצורה המיוחדת של המטוס */
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            padding: 100px 40px 120px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border: 1px solid #cbd5e1;
+            z-index: 2;
+        }
+
+        /* קוקפיט (חלון הטייס) */
+        .plane-body::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border-radius: 50% 50% 0 0;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            opacity: 0.8;
+        }
+
+        /* כנפיים (CSS Shapes) */
+        .wing-left, .wing-right {
+            position: absolute;
+            top: 45%;
+            transform: translateY(-50%);
+            width: 160px;
+            height: 120px;
+            background: linear-gradient(90deg, #cbd5e1 0%, #94a3b8 100%);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .wing-left {
+            left: -130px;
+            border-radius: 50% 0 0 50%;
+            clip-path: polygon(0 30%, 100% 0%, 100% 100%, 0 70%);
+        }
+
+        .wing-right {
+            right: -130px;
+            border-radius: 0 50% 50% 0;
+            clip-path: polygon(0 0%, 100% 30%, 100% 70%, 0 100%);
+        }
+
+        /* --- מושבים --- */
+        .cabin-grid { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 3; }
+        
+        .row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            position: relative; 
+        }
+        
+        .row-num { 
+            position: absolute; left: 50%; transform: translateX(-50%); 
+            font-size: 14px; color: var(--text-light); font-weight: 600; 
+        }
+
+        .seat-group { display: flex; gap: 8px; }
 
         .seat {
-            width: 42px; height: 46px;
+            width: 40px; height: 48px;
+            background: #fff;
+            border: 2px solid #cbd5e1;
             border-radius: 8px 8px 12px 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: 0.2s;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.08); 
-            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        /* משענת תחתונה */
+        .seat::after {
+            content: ''; position: absolute; bottom: -4px; left: 4px; right: 4px; height: 4px;
+            background: currentColor; opacity: 0.3; border-radius: 2px;
         }
 
-        .seat i { font-size: 18px; transition: 0.2s; }
-
-        .seat.biz { background: var(--seat-biz-bg); border-color: var(--seat-biz-bg); color: var(--seat-biz-icon); }
-        .seat.eco { background: var(--seat-eco-bg); border-color: var(--seat-eco-border); color: var(--seat-eco-icon); }
-        .seat.occ { background: var(--seat-occ-bg); color: var(--seat-occ-icon); cursor: not-allowed; border: none; box-shadow: none; opacity: 0.6; }
-
-        .seat:not(.occ):hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .seat:hover:not(.occupied) {
+            border-color: var(--flytau-teal); transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 129, 138, 0.2);
+        }
 
         .seat.selected {
-            background: var(--flytau-teal); color: white; border-color: var(--flytau-teal);
-            transform: scale(1.1); box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4); z-index: 10;
-        }
-        .seat.selected i { color: white; }
-        .seat.selected::after {
-            content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900;
-            position: absolute; top: -6px; right: -6px; background: white; color: var(--flytau-teal);
-            width: 18px; height: 18px; border-radius: 50%; font-size: 11px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: var(--flytau-teal);
+            border-color: var(--flytau-teal-hover);
+            color: #fff; /* לצבע ה-after */
+            box-shadow: 0 0 15px rgba(0, 129, 138, 0.4);
         }
 
-        footer {
-            position: fixed; bottom: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            padding: 10px 20px;
+        .seat.occupied {
+            background: var(--occupied); border-color: #94a3b8; cursor: not-allowed;
+        }
+
+        .seat.business {
+            background: var(--flytau-teal-light); border-color: #4fd1c5; width: 46px;
+        }
+        .seat.business.selected {
+            background: var(--flytau-navy); border-color: var(--flytau-navy);
+        }
+
+        /* יציאת חירום */
+        .exit-row {
+            margin: 20px 0; text-align: center;
+        }
+        .exit-badge {
+            display: inline-block; background: #fff; padding: 4px 12px; 
+            border-radius: 20px; font-size: 11px; font-weight: 700; 
+            color: #ef4444; border: 1px solid #fee2e2;
+        }
+
+        /* --- Sidebar (Fixed) --- */
+        .sidebar {
+            background: #fff;
+            padding: 30px;
+            overflow-y: auto;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .flight-info-card {
+            background: var(--flytau-navy); color: white;
+            border-radius: 16px; padding: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid var(--border-color); z-index: 2000; box-sizing: border-box;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         }
-        .price-box div:first-child { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .total-price { font-size: 24px; font-weight: 900; color: var(--flytau-navy); line-height: 1; }
-        
-        .btn-continue {
-            background: var(--flytau-navy); color: white; border: none;
-            padding: 10px 30px; border-radius: 10px; font-size: 14px; font-weight: 700;
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 5px 15px rgba(0, 27, 51, 0.2);
-        }
-        .btn-continue:hover:not(:disabled) { background: var(--flytau-teal); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3); }
-        .btn-continue:disabled { background: var(--seat-occ-bg); color: #94a3b8; cursor: not-allowed; opacity: 1; box-shadow: none; }
+        .route-text { font-size: 24px; font-weight: 800; }
+        .flight-sub { font-size: 13px; opacity: 0.8; }
 
-        @media (max-width: 450px) {
-            .fuselage { width: 100%; max-width: 300px; }
-            .wing, .tail-fin { display: none; } 
-            header { padding: 0 20px; }
-            .status-bar { flex-direction: column; width: 90%; text-align: center; gap: 10px; }
-            .legend { border-right: none; padding-right: 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        /* באנר המושבים */
+        .selected-seats-display {
+            background: linear-gradient(135deg, var(--flytau-teal) 0%, #006b72 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 129, 138, 0.25);
         }
+
+        .selected-seats-header {
+            font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; opacity: 0.9; font-weight: 700;
+        }
+
+        .selected-seat-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 16px; border-radius: 10px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(5px); animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .seat-item-number { font-size: 20px; font-weight: 700; }
+        .seat-item-class { font-size: 12px; opacity: 0.9; }
+        .seat-item-price { font-size: 18px; font-weight: 700; }
+
+        .remove-seat-btn {
+            background: rgba(255, 255, 255, 0.2); border: none; color: white;
+            width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+        .remove-seat-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+        .empty-selection { text-align: center; padding: 20px; opacity: 0.8; }
+
+        .price-summary {
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 22px; font-weight: 800; }
+
+        .btn-submit {
+            width: 100%; background: var(--flytau-navy); color: white;
+            padding: 18px; border: none; border-radius: 12px;
+            font-size: 18px; font-weight: 700; cursor: pointer;
+            margin-top: 10px; transition: 0.3s;
+        }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .btn-submit:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .class-card {
+            border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 20px;
+        }
+        .class-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .class-name { font-weight: 700; color: var(--flytau-navy); }
+        .features-list { list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--text-dark); }
+        .feature-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .check { color: var(--flytau-teal); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">
-            <img src="{{ url_for('static', filename='LOGO.jpeg') }}" alt="FLYTAU" onerror="this.src='{{ url_for('static', filename='LOGO.png') }}'">
-        </div>
-        <div class="flight-route">
-            {{ origin }} <i class="fas fa-plane"></i> {{ dest }}
-            <span class="flight-tag">{{ flight_id }}</span>
-        </div>
-    </header>
-
-    <div class="status-bar">
-        <div class="legend">
-            <div class="legend-item"><div class="dot" style="background:var(--seat-biz-bg);"></div> ביזנס</div>
-            <div class="legend-item"><div class="dot" style="background:var(--seat-eco-bg); border:1px solid var(--seat-eco-border);"></div> תיירים</div>
-            <div class="legend-item"><div class="dot" style="background:var(--seat-occ-bg);"></div> תפוס</div>
-            <div class="legend-item"><div class="dot" style="background:var(--flytau-teal);"></div> נבחר</div>
-        </div>
-        <div class="status-info">
-            נוסעים: <b><span id="selected-count">0</span></b> / {{ num_passengers }}
-        </div>
-    </div>
-
-    <div class="airplane-wrapper">
-        <div class="wing left"></div>
-        <div class="wing right"></div>
+<form id="seatsForm" action="/select_seats/{{ flight_id }}" method="POST">
+    
+    <div class="layout-container">
         
-        <div class="fuselage">
-            <div class="cockpit">
-                <div class="window-glass"></div>
-            </div>
-
-            <div class="cabin">
-                {% if biz_map %}
-                <div class="section-title"><span>Business Class (₪{{ bus_price }})</span></div>
-                <div class="grid" id="grid-biz">
-                    {% for row_num in biz_map.keys()|sort %}
-                        {% set row_seats = biz_map[row_num]|sort(attribute='seat_position') %}
-                        {% for seat in row_seats %}
-                            {% if seat.seat_position in ['A', 'B'] %}
-                            <div class="seat biz {% if seat.is_occupied %}occ{% endif %}" 
-                                 data-seat-code="{{ seat.code }}" 
-                                 data-seat-type="{{ seat.class_type }}" 
-                                 data-seat-price="{{ seat.price }}"
-                                 {% if not seat.is_occupied %}onclick="toggleSeat(this)"{% endif %}>
-                                <i class="fas fa-chair"></i>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                        <div class="aisle-num">{{ row_num }}</div>
-                        {% for seat in row_seats %}
-                            {% if seat.seat_position in ['C', 'D'] %}
-                            <div class="seat biz {% if seat.is_occupied %}occ{% endif %}" 
-                                 data-seat-code="{{ seat.code }}" 
-                                 data-seat-type="{{ seat.class_type }}" 
-                                 data-seat-price="{{ seat.price }}"
-                                 {% if not seat.is_occupied %}onclick="toggleSeat(this)"{% endif %}>
-                                <i class="fas fa-chair"></i>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                {% if eco_map %}
-                <div class="section-title"><span>Economy Class (₪{{ eco_price }})</span></div>
-                <div class="grid" id="grid-eco">
-                    {% for row_num in eco_map.keys()|sort %}
-                        {% set row_seats = eco_map[row_num]|sort(attribute='seat_position') %}
-                        {% for seat in row_seats %}
-                            {% if seat.seat_position in ['A', 'B'] %}
-                            <div class="seat eco {% if seat.is_occupied %}occ{% endif %}" 
-                                 data-seat-code="{{ seat.code }}" 
-                                 data-seat-type="{{ seat.class_type }}" 
-                                 data-seat-price="{{ seat.price }}"
-                                 {% if not seat.is_occupied %}onclick="toggleSeat(this)"{% endif %}>
-                                <i class="fas fa-chair"></i>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                        <div class="aisle-num">{{ row_num }}</div>
-                        {% for seat in row_seats %}
-                            {% if seat.seat_position in ['C', 'D'] %}
-                            <div class="seat eco {% if seat.is_occupied %}occ{% endif %}" 
-                                 data-seat-code="{{ seat.code }}" 
-                                 data-seat-type="{{ seat.class_type }}" 
-                                 data-seat-price="{{ seat.price }}"
-                                 {% if not seat.is_occupied %}onclick="toggleSeat(this)"{% endif %}>
-                                <i class="fas fa-chair"></i>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
+        <div class="plane-scroll-area">
             
-            <div class="tail-fin"></div>
+            <div class="plane-container">
+                <div class="wing-left"></div>
+                <div class="wing-right"></div>
+
+                <div class="plane-body">
+                    <div class="cabin-grid">
+                        
+                        <h3 style="text-align: center; color: var(--flytau-navy); margin: 0 0 10px;">מחלקת עסקים</h3>
+                        {% for row, seats in biz_map.items() %}
+                        <div class="row">
+                            <div class="seat-group">
+                                {% for s in seats if s.seat_position in ['A', 'B'] %}
+                                <div class="seat business {{ 'occupied' if s.is_occupied else '' }}"
+                                     data-row="{{ s.seat_row }}" 
+                                     data-pos="{{ s.seat_position }}" 
+                                     data-price="{{ s.price }}"
+                                     data-class="Business"
+                                     onclick="toggleSeat(this)"></div>
+                                {% endfor %}
+                            </div>
+                            <span class="row-num">{{ row }}</span>
+                            <div class="seat-group">
+                                {% for s in seats if s.seat_position in ['C', 'D'] %}
+                                <div class="seat business {{ 'occupied' if s.is_occupied else '' }}"
+                                     data-row="{{ s.seat_row }}" 
+                                     data-pos="{{ s.seat_position }}" 
+                                     data-price="{{ s.price }}"
+                                     data-class="Business"
+                                     onclick="toggleSeat(this)"></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="exit-row">
+                            <div class="exit-badge">יציאת חירום</div>
+                        </div>
+
+                        <h3 style="text-align: center; color: var(--flytau-navy); margin: 10px 0;">מחלקת תיירים</h3>
+                        {% for row, seats in eco_map.items() %}
+                        <div class="row">
+                            <div class="seat-group">
+                                {% for s in seats if s.seat_position in ['A', 'B', 'C'] %}
+                                <div class="seat {{ 'occupied' if s.is_occupied else '' }}"
+                                     data-row="{{ s.seat_row }}" 
+                                     data-pos="{{ s.seat_position }}" 
+                                     data-price="{{ s.price }}"
+                                     data-class="Economy"
+                                     onclick="toggleSeat(this)"></div>
+                                {% endfor %}
+                            </div>
+                            <span class="row-num">{{ row }}</span>
+                            <div class="seat-group">
+                                {% for s in seats if s.seat_position in ['D', 'E', 'F'] %}
+                                <div class="seat {{ 'occupied' if s.is_occupied else '' }}"
+                                     data-row="{{ s.seat_row }}" 
+                                     data-pos="{{ s.seat_position }}" 
+                                     data-price="{{ s.price }}"
+                                     data-class="Economy"
+                                     onclick="toggleSeat(this)"></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='LOGO.png') }}" alt="FLYTAU" style="height: 40px;">
+            </div>
+
+            <div class="flight-info-card">
+                <div>
+                    <div class="route-text">{{ origin }} <i class="fas fa-arrow-left" style="font-size: 16px;"></i> {{ dest }}</div>
+                    <div class="flight-sub">טיסה ישירה | בחירת מושבים</div>
+                </div>
+                <i class="fas fa-plane-departure" style="font-size: 24px; color: var(--flytau-teal);"></i>
+            </div>
+
+            <div class="selected-seats-display">
+                <div class="selected-seats-header">
+                    <i class="fas fa-check-circle"></i> המושבים שלך ({{ num_passengers }})
+                </div>
+                
+                <div id="selectedSeatsList">
+                    <div class="empty-selection">
+                        <div style="font-size: 32px; margin-bottom: 10px;">✈️</div>
+                        אנא בחר {{ num_passengers }} מושבים
+                    </div>
+                </div>
+
+                <div class="price-summary">
+                    <div class="total-row">
+                        <span style="font-size: 16px; font-weight: 500;">סה"כ לתשלום:</span>
+                        <span id="totalPriceDisplay">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                המשך לתשלום <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="class-card">
+                <div class="class-header">
+                    <span class="class-name">Business Class</span>
+                    <span style="color: var(--flytau-teal); font-weight:700;">${{ bus_price }}</span>
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item"><span class="check">✓</span> מרווח רגליים מוגדל</li>
+                    <li class="feature-item"><span class="check">✓</span> 2 מזוודות כלולות</li>
+                    <li class="feature-item"><span class="check">✓</span> ארוחת שף</li>
+                </ul>
+            </div>
+
+            <div class="class-card">
+                <div class="class-header">
+                    <span class="class-name">Economy Class</span>
+                    <span style="color: var(--flytau-teal); font-weight:700;">${{ eco_price }}</span>
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item"><span class="check">✓</span> מערכת בידור אישית</li>
+                    <li class="feature-item"><span class="check">✓</span> ארוחה קלה</li>
+                </ul>
+            </div>
+
+            <div id="hiddenInputsContainer"></div>
         </div>
     </div>
+</form>
 
-    <footer>
-        <div class="price-box">
-            <div>סה"כ לתשלום</div>
-            <div class="total-price">₪<span id="total-price">0</span></div>
-        </div>
-        <form method="POST" action="/select_seats/{{ flight_id }}" id="seat-form">
-            <input type="hidden" name="selected_seats_raw" id="selected-seats-input" value="">
-            <button type="submit" class="btn-continue" id="btn-next" disabled>
-                אישור ותשלום <i class="fas fa-arrow-left"></i>
-            </button>
-        </form>
-    </footer>
+<script>
+    const MAX_SEATS = {{ num_passengers }};
+    let selectedSeats = [];
 
-    <script>
-        const maxSeats = {{ num_passengers }};
-        let selected = [];
+    function toggleSeat(element) {
+        if (element.classList.contains('occupied')) return;
 
-        function toggleSeat(el) {
-            if (el.classList.contains('occ')) return;
+        const row = element.dataset.row;
+        const pos = element.dataset.pos;
+        const price = parseFloat(element.dataset.price);
+        const type = element.dataset.class;
+        const seatId = row + pos;
 
-            const code = el.getAttribute('data-seat-code');
-            const type = el.getAttribute('data-seat-type');
-            const price = parseFloat(el.getAttribute('data-seat-price'));
+        const existingIndex = selectedSeats.findIndex(s => s.id === seatId);
 
-            const index = selected.findIndex(s => s.code === code);
-            if (index > -1) {
-                selected.splice(index, 1);
-                el.classList.remove('selected');
-            } else {
-                if (selected.length < maxSeats) {
-                    selected.push({ code, type, price });
-                    el.classList.add('selected');
-                } else {
-                    alert(`ניתן לבחור מקסימום ${maxSeats} מושבים`);
-                }
+        if (existingIndex !== -1) {
+            selectedSeats.splice(existingIndex, 1);
+            element.classList.remove('selected');
+        } else {
+            if (selectedSeats.length >= MAX_SEATS) {
+                alert(`ניתן לבחור מקסימום ${MAX_SEATS} מושבים.`);
+                return;
             }
-            updateUI();
+            selectedSeats.push({ id: seatId, row: row, pos: pos, price: price, type: type });
+            element.classList.add('selected');
         }
+        updateSidebar();
+    }
 
-        function updateUI() {
-            document.getElementById('selected-count').innerText = selected.length;
-            const total = selected.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('total-price').innerText = total.toLocaleString();
+    function removeSeat(seatId) {
+        const seatEl = document.querySelector(`.seat[data-row="${seatId.slice(0, -1)}"][data-pos="${seatId.slice(-1)}"]`);
+        if (seatEl) toggleSeat(seatEl);
+    }
 
-            const btn = document.getElementById('btn-next');
-            btn.disabled = selected.length !== maxSeats;
+    function updateSidebar() {
+        const listEl = document.getElementById('selectedSeatsList');
+        const totalEl = document.getElementById('totalPriceDisplay');
+        const inputsContainer = document.getElementById('hiddenInputsContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        listEl.innerHTML = '';
+        inputsContainer.innerHTML = '';
+        let total = 0;
 
-            const form = document.getElementById('seat-form');
-            // הסרת אינפוטים ישנים
-            form.querySelectorAll('.temp-seat-input').forEach(el => el.remove());
-
-            // יצירת אינפוט מוסתר לכל מושב בנפרד
-            selected.forEach(s => {
+        if (selectedSeats.length === 0) {
+            listEl.innerHTML = `<div class="empty-selection"><div style="font-size:32px;margin-bottom:10px;">✈️</div>אנא בחר ${MAX_SEATS} מושבים</div>`;
+        } else {
+            selectedSeats.forEach(seat => {
+                total += seat.price;
+                listEl.innerHTML += `
+                    <div class="selected-seat-item">
+                        <div>
+                            <div class="seat-item-number">${seat.row}${seat.pos}</div>
+                            <div class="seat-item-class">${seat.type}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="seat-item-price">$${seat.price}</div>
+                            <button type="button" class="remove-seat-btn" onclick="removeSeat('${seat.id}')">✕</button>
+                        </div>
+                    </div>`;
+                
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'selected_seats_raw';
-                input.className = 'temp-seat-input';
-                input.value = `${s.code}|${s.type}|${s.price}`;
-                form.appendChild(input);
+                input.value = `${seat.id}|${seat.type}|${seat.price}`;
+                inputsContainer.appendChild(input);
             });
         }
 
-        document.getElementById('seat-form').addEventListener('submit', function(e) {
-            if (selected.length !== maxSeats) {
-                e.preventDefault();
-                alert(`אנא בחר ${maxSeats} מושבים`);
-            }
-        });
-    </script>
-
+        totalEl.innerText = '$' + total.toLocaleString();
+        
+        if (selectedSeats.length === MAX_SEATS) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `המשך לתשלום ($${total}) <i class="fas fa-check"></i>`;
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `נבחרו ${selectedSeats.length} מתוך ${MAX_SEATS}`;
+        }
+    }
+</script>
 </body>
 </html>
-
