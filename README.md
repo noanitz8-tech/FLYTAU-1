@@ -1,4 +1,4 @@
-# FLYTAU ✈️ | Flight Management Web Application
+# FLYTAU  | Flight Management Web Application
 
 ## About The Project
 FLYTAU is a comprehensive flight management and booking web application, developed as a 2nd-year academic project for the Industrial Engineering and Management B.Sc. program at Tel Aviv University. 
